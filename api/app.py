@@ -1,5 +1,6 @@
 """Flask app factory — create_app() is the single entry point."""
 import logging
+import os
 
 from flask import Flask, jsonify
 from werkzeug.exceptions import HTTPException
@@ -55,6 +56,10 @@ def create_app(config_object: type[Config] | None = None) -> Flask:
         return jsonify(error="Internal server error"), 500
 
     with app.app_context():
-        db.create_all()
+        # Dev/tests bootstrap the schema from models. In deployment the schema
+        # is owned by Alembic (`alembic upgrade head`) — set this flag there so
+        # the app never mutates the schema on boot.
+        if os.environ.get("AUTO_CREATE_SCHEMA", "1") == "1":
+            db.create_all()
 
     return app

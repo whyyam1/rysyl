@@ -1,4 +1,18 @@
-flask>=3.1
-flask-sqlalchemy>=3.1
-flask-cors>=4.0
-pytest>=8.0
+# RYSYL API — production dependency manifest.
+# Dev convenience: `pip install -r api/requirements.txt` covers tests too (pytest).
+# Deploy targets: `pip install -r api/requirements.txt deploy`
+# The [deploy] extra is intentionally NOT resolved on Windows dev machines.
+
+flask>=3.1,<4
+flask-sqlalchemy>=3.1,<4
+flask-cors>=4.0,<5
+alembic>=1.16,<2
+
+# --- deploy extra: production server + Postgres driver (Unix-only) ---
+[deploy]
+gunicorn>=23,<27
+psycopg[binary]>=3.2,<4
+
+# --- test extra: CI runs the suite with this ---
+[test]
+pytest>=8.2,<9
