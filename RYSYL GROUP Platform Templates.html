@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RYSYL GROUP</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#090F15;--card:rgba(38,46,54,.38);--line:rgba(179,183,186,.14);--mut:#6C6D74;--txt:#D3D1CE;--sil:#B3B7BA;--mtn:#262E36;--blue:#2f6d9e;--ok:#8fb8a0;--warn:#c9a86a;--bad:#c07a7a;--serif:'Cormorant Garamond',Georgia,serif;--sans:'Inter',system-ui,sans-serif;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--txt);font:300 15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;z-index:99;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
+.view{display:none}.view.on{display:block;animation:fade .7s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+h1,h2,h3{font-family:var(--serif);font-weight:300;margin:0;letter-spacing:-.01em;color:#eceae6;line-height:1.02}
+.eyebrow{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--sil);display:flex;align-items:center;gap:14px}
+
+.btn{display:inline-flex;align-items:center;gap:12px;padding:15px 30px;background:#e6e4e0;color:#090F15;border:0;font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:500;transition:.35s}
+.btn:hover{background:#fff;gap:20px}.btn.ghost{background:none;color:var(--txt);border:1px solid var(--line)}.btn.ghost:hover{border-color:var(--sil)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+/* switcher */
+#sw{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:100;display:flex;gap:2px;padding:5px;border-radius:99px;background:rgba(9,15,21,.82);backdrop-filter:blur(14px);border:1px solid var(--line)}
+#sw button{background:none;border:0;padding:8px 16px;border-radius:99px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+#sw button.on{background:var(--mtn);color:#fff}
+/* landing */
+.nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:24px 34px;transition:.4s}
+.nav.s{background:rgba(9,15,21,.8);backdrop-filter:blur(12px);padding:16px 34px}
+.logo{font-size:15px;letter-spacing:.42em;font-weight:400;color:#fff}.logo small{display:block;font-size:8px;letter-spacing:.4em;color:var(--mut)}
+.nav nav{display:flex;gap:34px;align-items:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sil)}
+.hero{position:relative;min-height:100vh;display:grid;place-items:center;text-align:center;overflow:hidden;padding:120px 24px 90px;background:radial-gradient(90% 70% at 85% 15%,#1d4a75 0,transparent 60%),radial-gradient(70% 60% at 0 100%,#0d2238 0,transparent 65%),var(--bg)}
+.big{position:absolute;left:50%;top:50%;font-family:var(--serif);font-weight:500;font-size:min(62vw,720px);line-height:.8;letter-spacing:-.06em;background:linear-gradient(165deg,#fff 0,#8a8f96 38%,rgba(38,46,54,.15) 78%);-webkit-background-clip:text;background-clip:text;color:transparent;transform:translate(-50%,-50%);opacity:.55;user-select:none;will-change:transform}
+.hc{position:relative;z-index:2;max-width:760px}
+.hero h1{font-size:clamp(46px,9vw,104px);margin:22px 0}.hero h1 em{color:var(--sil)}
+.hero p{max-width:480px;margin:0 auto 40px;color:var(--sil)}
+.hero .eyebrow{justify-content:center}
+.corner{position:absolute;bottom:28px;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--mut)}
+.sec{padding:140px 0}.light{background:#d3d1ce;color:#262E36}.light h2{color:#090F15}
+.words{font-family:var(--serif);font-size:clamp(28px,4.6vw,58px);line-height:1.18;max-width:1000px;margin:26px 0 0}
+.words span{color:#3b444d;transition:color .5s}.words span.lit{color:#eceae6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:80px;border-top:1px solid var(--line)}
+.stat{padding:34px 28px 0 0}.stat b{font:300 clamp(44px,6vw,76px)/1 var(--serif);color:#fff;display:block}
+.stat span{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--mut)}
+.pill{display:grid;grid-template-columns:repeat(4,1fr);margin-top:60px;border-top:1px solid rgba(9,15,21,.2)}
+.pill div{padding:32px 26px 60px 0;border-right:1px solid rgba(9,15,21,.12);border-top:2px solid transparent;margin-top:-1px;padding-left:26px;transition:.4s}
+.pill div:hover{border-top-color:#090F15}.pill i{font:300 20px var(--serif);color:#8b8f94;display:block;margin-bottom:38px}
+.pill h3{font-size:22px;color:#090F15;margin-bottom:10px;font-family:var(--sans);font-weight:400;font-size:12px;letter-spacing:.2em;text-transform:uppercase}.pill p{margin:0;font-size:13px;color:#4a545e}
+.quit{background:radial-gradient(80% 90% at 50% 100%,#123456 0,transparent 70%),var(--bg);text-align:center}
+.quit svg{width:100%;max-width:900px;margin:40px auto 0;display:block;overflow:visible}
+.quit path.l{fill:none;stroke:#e9e7e3;stroke-width:2.4;stroke-linejoin:round;stroke-dasharray:1600;stroke-dashoffset:1600;transition:stroke-dashoffset 3.2s ease}.quit.in path.l{stroke-dashoffset:0}
+.quit text{fill:var(--sil);font:10px var(--sans);letter-spacing:.2em}
+.quit h2{font-size:clamp(56px,11vw,150px)}.quit h2 em{color:var(--warn);font:400 .18em var(--sans);letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:10px}
+.cta{text-align:center}.cta h2{font-size:clamp(50px,9vw,120px);margin:22px 0 44px}
+footer{border-top:1px solid var(--line);padding:50px 0 120px;font-size:12px;color:var(--mut)}
+footer .wrap{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}footer p{max-width:420px;margin:0}
+.rv{opacity:0;transform:translateY(30px);transition:opacity 1s,transform 1s}.rv.in{opacity:1;transform:none}
+/* auth */
+.auth{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.aside{position:relative;padding:44px;display:flex;flex-direction:column;justify-content:space-between;background:radial-gradient(90% 70% at 100% 0,#1d4a75 0,transparent 60%),radial-gradient(60% 60% at 0 100%,#0d2238 0,transparent 70%),var(--bg);overflow:hidden}
+.aside h2{font-size:clamp(40px,5vw,72px);max-width:460px}.aside .big{font-size:60vh;left:70%;top:60%;opacity:.28}
+.form{display:grid;place-items:center;padding:40px 28px;background:#0b1219}.fbox{width:100%;max-width:400px}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:30px}.tabs button{flex:1;background:none;border:0;padding:14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);border-bottom:1px solid transparent;margin-bottom:-1px}.tabs button.on{color:#fff;border-color:#fff}
+label{display:block;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);margin:0 0 18px}
+input{display:block;width:100%;margin-top:8px;padding:13px 0;background:none;border:0;border-bottom:1px solid var(--line);color:#fff;font:300 15px var(--sans);outline:0;transition:.3s}input:focus{border-color:var(--sil)}
+.fbox .btn{width:100%;justify-content:center;margin-top:14px}.hint{font-size:12px;color:var(--mut);margin-top:22px;text-align:center}
+/* dashboards */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;background:radial-gradient(60% 50% at 100% 0,rgba(29,74,117,.32) 0,transparent 70%),var(--bg)}
+.side{padding:30px 20px;border-right:1px solid var(--line);background:rgba(9,15,21,.7);display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.side .logo{padding:0 12px 30px}.side a{padding:11px 14px;border-radius:10px;font-size:13px;color:var(--sil);display:flex;gap:12px;align-items:center;transition:.3s}
+.side a:hover{background:rgba(38,46,54,.5)}.side a.on{background:linear-gradient(90deg,#2b4a66,rgba(38,46,54,.3));color:#fff}.side a::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6}
+.side .end{margin-top:auto}
+.main{padding:36px 40px 120px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:30px;flex-wrap:wrap}.top h1{font-size:40px}.top p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.c{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;backdrop-filter:blur(10px);min-width:0}
+.c h4{margin:0 0 16px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--sil);font-weight:400;display:flex;justify-content:space-between}
+.s4{grid-column:span 4}.s3{grid-column:span 3}.s8{grid-column:span 8}.s12{grid-column:span 12}.s6{grid-column:span 6}
+.num{font:300 44px/1.05 var(--serif);color:#fff}.num small{font-size:14px;color:var(--mut);font-family:var(--sans);margin-right:6px}
+.up{color:var(--ok);font-size:12px}
+.bar{height:3px;background:var(--line);border-radius:9px;margin:18px 0 10px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#2f6d9e,#d3d1ce)}
+.kv{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);font-weight:400;padding:0 10px 12px}
+td{padding:13px 10px;border-top:1px solid var(--line);white-space:nowrap}.tw{overflow-x:auto}
+.b{padding:3px 11px;border-radius:99px;font-size:11px;border:1px solid}.b.ok{color:var(--ok);border-color:rgba(143,184,160,.4)}.b.warn{color:var(--warn);border-color:rgba(201,168,106,.4)}.b.bad{color:var(--bad);border-color:rgba(192,122,122,.4)}.b.mut{color:var(--sil);border-color:var(--line)}
+.sm{padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:none;font-size:11px;margin-left:4px}.sm:hover{border-color:var(--sil)}.sm.y:hover{color:var(--ok)}.sm.n:hover{color:var(--bad)}
+.srch{width:220px;margin:0;padding:10px 16px;border:1px solid var(--line);border-radius:99px;font-size:13px}
+.li{padding:12px 0;border-top:1px solid var(--line);font-size:13px;display:flex;justify-content:space-between;gap:12px}.li:first-of-type{border:0}.li span{color:var(--mut);font-size:12px}
+svg.ch{width:100%;height:auto;display:block}
+.c{position:relative;overflow:hidden}.c::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(340px circle at var(--x,50%) var(--y,0),rgba(211,209,206,.1),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}.c:hover::before{opacity:1}.c:hover{border-color:rgba(179,183,186,.3)}
+.view.on .c,.view.on .ban{animation:up .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*70ms)}@keyframes up{from{opacity:0;transform:translateY(20px)}}
+.ban{grid-column:span 12;position:relative;overflow:hidden;min-height:190px;padding:34px;border:1px solid var(--line);border-radius:24px;display:flex;align-items:flex-end;background:radial-gradient(70% 130% at 100% 0,#1d4a75 0,transparent 62%),radial-gradient(50% 100% at 0 100%,#0d2238 0,transparent 70%),#0b1219}
+.ban .big{font-size:400px;left:86%;top:58%;opacity:.32}
+.top h1,.num{background:linear-gradient(180deg,#fff 35%,#8d939a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.dot{display:inline-block;width:7px;height:7px;margin:0 4px 1px;border-radius:50%;background:var(--ok);animation:pl 2s infinite}@keyframes pl{0%{box-shadow:0 0 0 0 rgba(143,184,160,.6)}100%{box-shadow:0 0 0 10px transparent}}
+.mb,.scrim{display:none}@media(max-width:900px){.pill{grid-template-columns:1fr 1fr}.app{grid-template-columns:1fr}.side{position:fixed;left:0;top:0;bottom:0;width:264px;height:100%;z-index:70;transform:translateX(-102%);transition:transform .45s cubic-bezier(.2,.7,.2,1);background:rgba(9,15,21,.98);padding-top:calc(30px + env(safe-area-inset-top,0px))}.app.open .side{transform:none}.mb{display:inline-flex;margin-bottom:20px;padding:9px 20px;border:1px solid var(--line);background:none;border-radius:99px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--sil)}.scrim{display:block;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.62);opacity:0;pointer-events:none;transition:opacity .4s}.app.open .scrim{opacity:1;pointer-events:auto}.main{padding:26px 18px 120px}.s4,.s3,.s8,.s6{grid-column:span 12}.nav nav a{display:none}.stats{grid-template-columns:1fr}.stat{padding-bottom:26px}}
+@media(max-width:640px){.auth{grid-template-columns:1fr}.aside{min-height:46vh;padding:28px}.aside .big{font-size:36vh;left:74%;top:64%}.aside h2{font-size:40px}.form{padding:34px 22px 130px}}@media(max-width:480px){#sw button{padding:8px 10px;font-size:10px}.pill{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="sw"><button data-v="land" data-go="land">Landing</button><button data-v="auth" data-go="auth">Sign in</button><button data-v="client" data-go="client">Client</button><button data-v="admin" data-go="admin">Admin</button></div>
+
+<!-- LANDING -->
+<div class="view on" id="land">
+<div class="nav" id="nav"><div class="logo">RYSYL<small>GROUP</small></div><nav><a href="#">Philosophy</a><a href="#">Process</a><a href="#">Contact</a><a class="btn ghost" data-go="auth" style="padding:10px 22px">Sign in</a></nav></div>
+<section class="hero"><div class="big" id="big">1%</div>
+<div class="hc"><div class="eyebrow">Members only</div><h1>Patience is<br><em>the edge.</em></h1><p>Rysyl Group is a members platform for those who play the long game. Verified deposits, visible cycles, nothing hidden.</p><a class="btn" data-go="auth">Open an account &rarr;</a></div>
+<div class="corner" style="left:34px">Scroll</div></section>
+
+<section class="sec"><div class="wrap"><div class="eyebrow rv">Philosophy</div>
+<p class="words" id="wr">Most people chase the noise. We built a quiet place for those who do not, where every deposit is verified, every cycle is tracked, and every return is recorded in full view.</p>
+<div class="stats"><div class="stat rv"><b data-n="500" data-s="+">0</b><span>Members</span></div><div class="stat rv"><b data-n="100" data-s="%">0</b><span>Transactions audited</span></div><div class="stat rv"><b data-n="24" data-s="h">0</b><span>Deposit verification</span></div></div></div></section>
+
+<section class="sec light"><div class="wrap"><div class="eyebrow rv" style="color:#4a545e">Process</div><h2 class="rv" style="font-size:clamp(40px,6vw,76px);margin-top:22px;max-width:640px">A disciplined approach to growing capital.</h2>
+<div class="pill rv"><div><i>01</i><h3>Deposit</h3><p>Fund your account. Every transaction carries its own unique reference.</p></div><div><i>02</i><h3>Verify</h3><p>An administrator confirms each deposit before it counts.</p></div><div><i>03</i><h3>Invest</h3><p>Your cycle starts with fixed dates and a visible maturity.</p></div><div><i>04</i><h3>Return</h3><p>Approved returns are recorded permanently in your history.</p></div></div></div></section>
+
+<section class="sec quit" id="qt"><div class="wrap"><div class="eyebrow rv" style="justify-content:center">The long game</div>
+<svg viewBox="0 0 900 260"><path class="l" d="M0 210 L40 190 L80 215 L120 150 L160 175 L200 130 L240 190 L280 150 L310 165 L340 120 L380 170 L410 135 L440 150 L470 100 L510 140 L550 95 L600 130 L650 70 L700 105 L760 40"/>
+<text x="200" y="245" text-anchor="middle">WHERE MOST QUIT</text><text x="440" y="245" text-anchor="middle">WHERE MORE QUIT</text></svg>
+<h2 class="rv"><em>Be that</em>1%</h2></div></section>
+
+<section class="sec cta"><div class="wrap"><div class="eyebrow rv" style="justify-content:center">Begin</div><h2 class="rv">Begin quietly.</h2><a class="btn rv" data-go="auth">Create account &rarr;</a></div></section>
+<footer><div class="wrap"><div class="logo">RYSYL GROUP</div><p>Every deposit verified. Every cycle recorded. Every return in view.</p><span><a href="#" style="border-bottom:1px solid var(--mut)">Terms &amp; Disclosures</a> &nbsp;&middot;&nbsp; &copy; 2026 RYSYL GROUP</span></div></footer>
+</div>
+
+<!-- AUTH -->
+<div class="view" id="auth"><div class="auth">
+<div class="aside"><div class="big">1%</div><div class="logo" style="position:relative;z-index:2">RYSYL<small>GROUP</small></div><h2 style="position:relative;z-index:2">Built slowly. Built to last.</h2></div>
+<div class="form"><div class="fbox"><div class="tabs"><button class="on" data-t="in">Sign in</button><button data-t="reg">Register</button></div>
+<div class="reg" hidden><label>Full name<input placeholder="Your name"></label><label>Phone<input placeholder="+254"></label></div>
+<label>Email<input type="email" placeholder="you@email.com"></label><label>Password<input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label>
+<div class="reg" hidden><label>Confirm password<input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></label></div>
+<button class="btn" id="go" data-go="client">Sign in &rarr;</button><div class="hint" id="ah">Admin? <a data-go="admin" style="color:#fff;border-bottom:1px solid var(--mut);cursor:pointer">Admin sign in</a></div></div></div></div></div>
+
+<!-- CLIENT -->
+<div class="view" id="client"><div class="app"><div class="scrim"></div><aside class="side"></aside><main class="main"><button class="mb">Menu</button>
+<div class="top"><div><h1>Welcome back, Daniel</h1><p>Your account overview &middot; 23 Sep 2026</p></div><button class="btn">+ New deposit</button></div>
+<div class="grid">
+<div class="ban"><div class="big">R</div><div style="position:relative;z-index:2"><div class="eyebrow">Principle of the day</div><h2 class="pq" style="font-size:clamp(28px,3.8vw,48px);margin-top:14px;max-width:660px"></h2></div></div>
+<div class="c s4"><h4>Account balance</h4><div class="num"><small>KES</small>1,284,500</div><div class="up">&uarr; 4.2% this cycle</div></div>
+<div class="c s4"><h4>Invested</h4><div class="num"><small>KES</small>1,000,000</div><div class="kv" style="margin-top:12px"><span>Available</span><span>KES 284,500</span></div></div>
+<div class="c s4"><h4>Approved returns</h4><div class="num"><small>KES</small>84,500</div><div class="kv" style="margin-top:12px"><span>Completed cycles</span><span>2</span></div></div>
+<div class="c s8"><h4>Portfolio value <span>2026</span></h4><svg class="ch" id="ch1" viewBox="0 0 640 220"></svg></div>
+<div class="c s4"><h4>Active cycle <span class="b ok">Active</span></h4><div class="num" style="font-size:34px">Cycle 03</div><div class="bar"><i style="width:64%"></i></div><div class="kv"><span>Started 01 Aug</span><span>Matures 30 Oct</span></div><div class="kv" style="margin-top:14px"><span>Days remaining</span><span style="color:#fff">37</span></div></div>
+<div class="c s8"><h4>Transactions <span>See all</span></h4><div class="tw"><table id="tx"><tr><th>Ref</th><th>Type</th><th>Amount</th><th>Date</th><th>Status</th></tr></table></div></div>
+<div class="c s4"><h4>Notifications</h4><div class="li">Deposit DEP-10517 submitted<span>2h</span></div><div class="li">Cycle 03 is now active<span>1d</span></div><div class="li">Return recorded<span>3w</span></div></div>
+</div></main></div></div>
+
+<!-- ADMIN -->
+<div class="view" id="admin"><div class="app"><div class="scrim"></div><aside class="side"></aside><main class="main"><button class="mb">Menu</button>
+<div class="top"><div><h1>Operations</h1><p>Administrator overview</p></div><input class="srch" id="cq" placeholder="Search clients"></div>
+<div class="grid">
+<div class="ban"><div class="big">R</div><div style="position:relative;z-index:2"><div class="eyebrow">Principle of the day</div><h2 class="pq" style="font-size:clamp(28px,3.8vw,48px);margin-top:14px;max-width:660px"></h2></div></div>
+<div class="c s3"><h4>Clients</h4><div class="num">1,248</div></div><div class="c s3"><h4>Active accounts</h4><div class="num">1,190</div></div><div class="c s3"><h4>Pending deposits</h4><div class="num" id="pc">4</div></div><div class="c s3"><h4>Needs review</h4><div class="num" style="color:var(--warn)">7</div></div>
+<div class="c s12"><h4>Pending deposits</h4><div class="tw"><table id="pd"><tr><th>Ref</th><th>Client</th><th>Amount</th><th>Payment ref</th><th>Status</th><th></th></tr></table></div></div>
+<div class="c s8"><h4>Clients</h4><div class="tw"><table id="cl"><tr><th>Client</th><th>Balance</th><th>Cycles</th><th>Status</th></tr></table></div></div>
+<div class="c s4"><h4>Audit log</h4><div class="li">Admin approved DEP-10482<span>09:12</span></div><div class="li">Status set to Review: J. Otieno<span>08:40</span></div><div class="li">Cycle 03 activated: D. Mwangi<span>Yesterday</span></div><div class="li">Report exported (CSV)<span>Yesterday</span></div></div>
+</div></main></div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const cls={Approved:'ok',Completed:'ok',Active:'ok',Pending:'warn',Review:'warn',Suspended:'bad',Rejected:'bad'};
+const bd=s=>`<span class="b ${cls[s]||'mut'}">${s}</span>`;
+function show(v){$$('.view').forEach(e=>e.classList.toggle('on',e.id===v));$$('#sw button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));scrollTo(0,0);watch();tick();vibe();$$('.app').forEach(a=>a.classList.remove('open'))}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();show(g.dataset.go)}});
+document.addEventListener('click',e=>{const a=e.target.closest('.app');if(!a)return;if(e.target.closest('.mb'))a.classList.toggle('open');else if(e.target.closest('.scrim,.side a'))a.classList.remove('open')});
+// sidebars
+const items={client:['Dashboard','Investments','Deposits','Transactions','Notifications','Profile'],admin:['Overview','Clients','Deposits','Investments','Reports','Audit logs']};
+$$('.side').forEach((s,i)=>{const k=['client','admin'][i];s.innerHTML='<div class="logo">RYSYL<small>'+(k==='admin'?'GROUP ADMIN':'GROUP')+'</small></div>'+items[k].map((t,j)=>`<a href="#"${j?'':' class="on"'}>${t}</a>`).join('')+'<a class="end" data-go="auth">Sign out</a>'});
+// chart
+function area(id,d){const el=$(id),w=640,h=200,mx=Math.max(...d),mn=Math.min(...d)*.9,p=d.map((v,i)=>[i*w/(d.length-1),h-(v-mn)/(mx-mn)*(h-30)-10]);const l=p.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');
+el.innerHTML=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6d9e" stop-opacity=".5"/><stop offset="1" stop-color="#2f6d9e" stop-opacity="0"/></linearGradient></defs><path d="${l} L${w} ${h} L0 ${h}Z" fill="url(#g)"/><path d="${l}" fill="none" stroke="#d3d1ce" stroke-width="2"/><circle cx="${p[7][0]}" cy="${p[7][1]}" r="5" fill="#fff"/>`+['Jan','Mar','May','Jul','Sep','Dec'].map((m,i)=>`<text x="${i*w/5}" y="216" fill="#6C6D74" font-size="10" text-anchor="${i?i==5?'end':'middle':'start'}">${m}</text>`).join('')}
+area('#ch1',[900,920,915,960,990,975,1010,1040,1035,1080,1120,1150,1284].map(v=>v));
+// tables
+[['DEP-10517','Deposit','KES 100,000','21 Sep','Pending'],['DEP-10482','Deposit','KES 250,000','12 Sep','Approved'],['RET-20931','Return','KES 18,750','01 Sep','Completed'],['WDR-30412','Withdrawal','KES 40,000','28 Aug','Completed']].forEach(r=>$('#tx').insertAdjacentHTML('beforeend','<tr>'+r.map((c,i)=>`<td>${i==4?bd(c):c}</td>`).join('')+'</tr>'));
+[['DEP-10521','D. Mwangi','KES 150,000','QK82LM19XA'],['DEP-10522','A. Kamau','KES 500,000','QK83PN02TZ'],['DEP-10523','J. Otieno','KES 75,000','QK83RT77BC'],['DEP-10524','S. Njeri','KES 220,000','QK84AA31DE']].forEach(r=>$('#pd').insertAdjacentHTML('beforeend',`<tr>${r.map(c=>`<td>${c}</td>`).join('')}<td class="st">${bd('Pending')}</td><td><button class="sm y">Approve</button><button class="sm n">Reject</button></td></tr>`));
+$('#pd').addEventListener('click',e=>{const b=e.target.closest('.sm');if(!b)return;const r=b.closest('tr'),ok=b.classList.contains('y');r.querySelector('.st').innerHTML=bd(ok?'Approved':'Rejected');b.parentNode.innerHTML='';$('#pc').textContent=$$('#pd .st .warn').length});
+const cl=[['Daniel Mwangi','KES 1,284,500',2,'Active'],['Amina Kamau','KES 3,100,000',3,'Review'],['James Otieno','KES 450,000',3,'Review'],['Sarah Njeri','KES 720,000',1,'Active'],['Peter Ouma','KES 0',1,'Suspended']];
+const draw=f=>{$$('#cl tr:not(:first-child)').forEach(r=>r.remove());cl.filter(r=>r[0].toLowerCase().includes(f)).forEach(r=>$('#cl').insertAdjacentHTML('beforeend','<tr>'+r.map((c,i)=>`<td>${i==3?bd(c):c}</td>`).join('')+'</tr>'))};draw('');$("#cq").oninput=e=>draw(e.target.value.toLowerCase());
+// auth tabs
+$$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));const r=b.dataset.t==='reg';$$('.reg').forEach(e=>e.hidden=!r);$('#go').innerHTML=(r?'Create account':'Sign in')+' &rarr;';$('#ah').style.visibility=r?'hidden':'visible'});
+// landing motion
+const wr=$('#wr');wr.innerHTML=wr.textContent.split(' ').map(w=>`<span>${w}</span>`).join(' ');const sp=$$('#wr span');
+function tick(){const y=scrollY;$('#nav').classList.toggle('s',y>60);$('#big').style.transform=`translate(-50%,calc(-50% + ${y*.22}px)) scale(${1+y/3500})`;
+const r=wr.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight*.8-r.top)/(r.height+innerHeight*.25)));sp.forEach((s,i)=>s.classList.toggle('lit',i/sp.length<p))}
+addEventListener('scroll',tick,{passive:true});
+let io;function watch(){io&&io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('in');e.target.querySelectorAll&&e.target.querySelectorAll('[data-n]').forEach(n=>{if(n.dataset.d)return;n.dataset.d=1;const t=+n.dataset.n;let s=null;const f=ts=>{s=s||ts;const k=Math.min(1,(ts-s)/1600);n.textContent=Math.round(t*(1-Math.pow(1-k,3)))+n.dataset.s;k<1&&requestAnimationFrame(f)};requestAnimationFrame(f)})}),{threshold:.25});$$('#land .rv,#qt').forEach(e=>io.observe(e))}
+$('.stat')&&$$('.stat').forEach(s=>s.classList.add('rv'));
+function spark(c,d,col){const w=120,h=30,mx=Math.max(...d),mn=Math.min(...d),p=d.map((v,i)=>(i*w/(d.length-1)).toFixed(1)+' '+(h-(v-mn)/(mx-mn||1)*(h-4)-2).toFixed(1));c.insertAdjacentHTML('beforeend',`<svg viewBox="0 0 ${w} ${h}" style="position:absolute;right:20px;bottom:18px;width:96px"><path d="M${p.join(' L')}" fill="none" stroke="${col||'#8fb8a0'}" stroke-width="1.6"/></svg>`)}
+let sk=0;function vibe(){const q=['Wealth is built in silence, one cycle at a time.','The calm hand outlasts the loud one.','Patience is not waiting. It is compounding.','Discipline today, freedom tomorrow.','Do the work. Let time do the rest.'],d=new Date().getDate();$$('.pq').forEach((e,i)=>e.textContent=q[(d+i)%q.length]);$$('.view.on .c,.view.on .ban').forEach((c,i)=>c.style.setProperty('--i',i));
+if(sk)return;sk=1;const S=[[3,4,4,5,6,6,8,9],[5,5,6,6,6,7,7,7],[1,2,2,4,5,5,7,8]];$$('#client .grid>.c:nth-child(n+2):nth-child(-n+4)').forEach((c,i)=>spark(c,S[i]));$$('#admin .grid>.c.s3').forEach((c,i)=>spark(c,[[2,3,5,4,7,8,9,11],[5,6,6,7,8,8,9,9],[6,3,5,2,4,3,6,4],[1,1,2,2,3,3,5,6]][i],i==3?'#c9a86a':0))}
+document.addEventListener('mousemove',e=>{const c=e.target.closest&&e.target.closest('.c');if(c){const r=c.getBoundingClientRect();c.style.setProperty('--x',e.clientX-r.left+'px');c.style.setProperty('--y',e.clientY-r.top+'px')}});
+show('land');
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Local data — SQLite instance DB (seed/demo data lives here, never in git)
+instance/
+*.db
+*.sqlite3
+
+# Secrets
+.env
+.env.*
+!api/.env.example
+
+# Node / Vite
+web/node_modules/
+web/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db

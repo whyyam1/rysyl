@@ -1,0 +1,128 @@
+# RYSYL — Session Recap & Sprint Backlog
+
+**Purpose:** The memory of this project. Holds the sprint backlog for the path to MVP and tracks what is DONE vs REMAINING. Update at the end of every working session. Never start a session without reading this file first.
+**Project root:** `C:\Projects2\RYSYL`
+**Last updated:** 1 Oct 2026
+
+---
+
+## 1. Project Identity (from the proposal — do not re-litigate)
+
+| Attribute | Value |
+|---|---|
+| **Product** | Rysyl — web-based investment & member management platform (client side + admin side) |
+| **Canonical docs** | `MVP_Proposal_Investment_Platform_v1.docx` (scope & architecture) · `RYSYL GROUP Platform Templates.html` (design system, ported 1:1 — treat as locked) |
+| **Codebase** | `web/` — Vite + React + TypeScript (UI port complete) |
+| **Stack (per proposal §8)** | React + TypeScript + Tailwind-style CSS (template CSS in use) → Flask REST API + SQLAlchemy → PostgreSQL |
+| **Money rule (NON-NEGOTIABLE)** | Balances are **always derived from transaction history** — never stored as an editable field, never edited directly |
+| **Units rule** | All monetary amounts as integers (whole KES or minor units — pick one, document it, never mix) |
+| **Deletion rule** | Accounts are suspended/deactivated, never deleted — history and audit trail must survive |
+| **Verification (MVP)** | Manual deposit verification: client submits → Pending → admin approves/rejects. Automated payments are a later phase |
+| **Notifications (MVP)** | Email only. SMS/WhatsApp later |
+
+**Design system (locked, from template):** bg `#090F15` · card `rgba(38,46,54,.38)` · line `rgba(179,183,186,.14)` · text `#D3D1CE` · silver `#B3B7BA` · blue `#2f6d9e` · ok `#8fb8a0` · warn `#c9a86a` · bad `#c07a7a`. Serif: Cormorant Garamond (300/400/500). Sans: Inter (300/400/500). Giant "1%" motif, principle-of-the-day quotes, two-shell rule (client + admin dashboards are dark glass cards).
+
+---
+
+## 2. Path to MVP — Sprint Backlog
+
+Legend: `[x]` done · `[~]` in progress · `[ ]` not started
+
+### Sprint 0 — Foundations & UI port
+- [x] Read proposal + template, extract scope and design tokens
+- [x] Scaffold Vite + React + TS app (`web/`)
+- [x] Port template CSS 1:1 to `web/src/index.css` (verbatim, nothing restyled)
+- [x] Landing view — parallax 1% hero, word-lighting philosophy, count-up stats, process pills, line-draw SVG, CTA, footer
+- [x] Auth view — sign in / register tabs, admin link, split 1% panel
+- [x] Client dashboard view — principle banner, KPI cards + sparklines, portfolio chart, active cycle, transactions table, notifications
+- [x] Admin dashboard view — ops stats, pending-deposits approve/reject (working, local state), client search, audit log
+- [x] View switcher (Landing/Sign in/Client/Admin) + card cursor-glow + mobile drawer
+- [x] Production build passes clean, all four views browser-verified
+- [ ] `git init` + first commit + `.gitignore` (node_modules, dist, .env)
+
+### Sprint 1 — Data layer & API skeleton
+- [x] Flask project scaffold in `api/` (app factory, config, blueprints, error handler, logging)
+- [x] Database schema: users, accounts, transactions, cycles, notifications, audit_logs (SQLite dev file `api/rysyl.db`; Postgres via DATABASE_URL when provided)
+- [x] SQLAlchemy models (Alembic migrations deferred until Postgres is provisioned — schema is created from models for now)
+- [x] Derive-balance invariant enforced in the data layer (`Account.balance()`; unit test proves editing a tx decision moves the balance)
+- [x] Money as integer minor units everywhere; `money.py` is the only converter; frontend `fmtKes` displays
+- [x] Seed script — demo clients/deposits/cycles matching the template numbers exactly (`python -m api.seed`)
+- [x] Audit-log helper: every admin action writes who/what/when, append-only
+
+### Sprint 2 — Auth, accounts & roles
+- [x] Register → verify (email OTP recorded as placeholder, ID docs later) → login, secure password hashing
+- [x] Role-based access (client vs admin) with decorators; suspended accounts blocked at login AND by session guard
+- [x] Signed-cookie sessions (itsdangerous, HttpOnly, SameSite=Lax, 14d) + in-memory rate limiting on auth routes
+- [x] Profile CRUD partial: status model (Active/Review/Suspended) with admin-only transitions wired
+- [x] Wire Auth view to real API (register/login live; Profile pages still template-only)
+
+### Sprint 3 — Deposits & transaction workflow
+- [x] Client submits deposit → unique reference (DEP-#####) → Pending ("+ New deposit" modal live, template-styled)
+- [x] Capture payer name + payment reference on submission (admin matches two fields to verify)
+- [x] Admin approve/reject → status + audit entry with who/when → balances recompute — verified end-to-end in browser
+- [x] Client transaction history page — Transactions sub-page with type filters (All/Deposit/Withdrawal/Return)
+- [x] Withdrawals behind the same transaction workflow: client "Request withdrawal" modal (amount ≤ derived balance, destination in note) → Pending → admin decision; deposits & withdrawals pages live
+
+### Sprint 4 — Investment cycles & returns
+- [x] Cycle module: full state machine enforced server-side (`_CYCLE_TRANSITIONS`) + admin transition buttons (Approve/Activate/Mark maturing/Mark matured/Complete/Cancel)
+- [x] Configurable duration, rate (bps), min principal, review threshold — `api/settings.py` → config → endpoints; client requests validated against them
+- [x] Maturity date logic on activation (started_on/matures_on, integer progress %) + expected return computed in integer math (`principal * rate_bps // 10_000`)
+- [x] Auto-flag account "Review Required" at the configured completed-cycles threshold (verified live: Daniel hit 3 → flagged)
+- [x] Client Investments page — cycle cards with progress, request-a-cycle form (guards: ≤ balance, ≥ min, one open cycle)
+- [x] Admin Cycles page — settings cards, counts, full table with per-status next action, admin-initiated cycle creation modal
+
+### Sprint 5 — Admin platform completion
+- [x] Client management: search/filter, drill-in modal (derived balance + last 50 txs + status buttons), status management (suspend-don't-delete)
+- [x] Reports page: deposits CSV + derived-balances CSV (minor units + KES display; every export audit-logged)
+- [x] Audit log viewer — full 200-entry feed with actor + time
+- [x] Admin overview aggregates from real data (clients/active/pending/needs-review; completed-cycles per client; sidebar nav live)
+
+### Sprint 6 — Notifications & full API wiring
+- [~] Email notifications: `notify.py` has best-effort SMTP (env-gated, never blocking); notification rows recorded in DB and shown live; no SMTP credentials yet
+- [x] Client dashboard + admin dashboard fully API-driven; deposit modal → admin queue → decision → audit → notification chain verified live
+- [x] Notifications page for clients (full feed); loading/empty/error states on all sub-pages
+- [x] Profile page live (name/email/phone save via PUT /me/profile; account card with status/role/cycles)
+
+### Sprint 7 — Hardening & launch
+- [ ] Security review: input + server-side validation, CSRF, rate limits, secure headers, admin 2FA decision
+- [ ] Automated DB backups + error logging + basic monitoring
+- [ ] Deployment (Linux server / cloud, HTTPS, env-based secrets)
+- [ ] Final responsive pass against template (900px / 640px / 480px breakpoints)
+
+---
+
+## 3. Open Questions (resolve before the sprint that needs them)
+
+1. **Regulatory:** member deposits + promised returns may be licensed activity in Kenya (CBK/CMA/SASRA depending on structure). "Members only" gating must be real. Confirm legal structure **before real money**.
+2. **Verification:** what does "verify account" mean at MVP? (Email/phone OTP is enough; ID docs later.)
+3. **Money units:** whole KES vs minor units — decide in Sprint 1, then never revisit.
+4. **Payments:** is there an existing M-Pesa/payments integration to connect, or does manual verification carry MVP? (Proposal assumes manual.)
+5. **Admin 2FA:** recommend yes from day one; confirm.
+
+---
+
+## 4. Environment & Commands (memory)
+
+- **Web dev server:** `cd web && npm run dev -- --port 5183 --strictPort` → http://localhost:5183 (proxies `/api` → Flask)
+- **API dev server:** `python -m api` → http://127.0.0.1:5001 (uses `RYSYL_PORT` env var, NOT `PORT` — sandboxes inject that)
+- **Seed demo data:** `python -m api.seed` (resets DB to template numbers; prints credentials)
+- **Run tests:** `python -m pytest -q` (16 tests incl. the derived-balance invariant, cycle state machine, review-flag, CSV)
+- **Build check:** `cd web && npm run build` (runs `tsc -b && vite build`)
+- **Demo logins:** admin@rysyl.group / Admin#2026 · daniel@rysyl.group / Demo#2026
+- **Freebuff restarts kill dev servers** — restart both commands above after any restart.
+- Template references (fidelity is 1:1 — any deviation is a bug): `C:\Projects2\RYSYL\rysyl-templates.html` (NEWER, 65KB — wins on conflicts) and `C:\Projects2\RYSYL\RYSYL GROUP Platform Templates.html` (original, 27KB).
+
+## 5. Session Log (append one line per session)
+
+- **24 Sep 2026** — Read proposal + template; gave MVP review. Ported the full template UI 1:1 into `web/` (4 views, all verified in browser). Sprint 0 complete except git init. Next: git init, then Sprint 1 data layer.
+- **24 Sep 2026 (2)** — Built the whole self-contained backend + wiring: Flask API (auth with rate limiting, deposits, admin decisions, audit, notifications), integer-minor-unit money with derived-balance invariant (10 passing tests incl. invariant test), seed matching template numbers exactly (Daniel = KES 1,284,500 verified), all four React views wired to the API (live dashboards, working deposit modal, approve/reject verified in browser). Remaining self-contained work: sub-pages (transactions/investments/notifications/profile), Alembic+Postgres, cycles admin screens, CSV export, git init.
+- **27 Sep 2026 (2)** — Full template fidelity audit: re-read the template line-by-line and diffed every CSS rule + JS behavior against the implementation. Fixed 4 deviations: (1) long-game line-draw never animated — added IntersectionObserver so #qt gets .in and the path draws (dashoffset 1600→0, 3.2s); (2) balance card sub-line now "↑ 4.2% this cycle"; (3) transactions card header now "See all"; (4) admin sidebar item renamed Cycles→Investments per the template's nav map. CSS port re-verified identical. All fixes verified live in browser; build clean.
+- **27 Sep 2026** — Completed all remaining self-contained product code. Full sub-page navigation on both shells: client (Transactions w/ filters, Deposits, Investments w/ cycle request + guards, Notifications, Profile w/ save, withdrawal modal), admin (Clients drill-in + status mgmt, Deposits queue, Cycles w/ state-machine transitions + admin-initiated creation, Reports CSV exports, Audit viewer). New: configurable cycle settings (settings.py), withdrawals endpoint, auto review-flag at threshold (verified live), 16 passing tests incl. state-machine/CSV/invariant. Fixed cycle-ref collision bug (max-suffix derivation) + CY ref padding. Verified end-to-end in browser: lifecycle Pending→Completed, flag firing, CSV content, profile save, withdrawal request. Demo data reset. Remaining: git init, Postgres/Alembic, SMTP creds, security review, deployment, regulatory.
+- **30 Sep 2026** — v2-parity merge: ported every rysyl_v2 (Lovable) capability ours lacked, onto the real Flask API (v2 is mock-only by its own AGENTS.md mandate). NEW pages: client Security (password change + email prefs), client Support (messages recorded in DB, never deleted), Forgot/Reset password (hashed single-use tokens, 30-min expiry, no user enumeration, TESTING-mode token for tests), admin Transactions (platform ledger view), admin Returns (record returns on completed cycles — ledger row, duplicate-guarded, balance re-derives), admin Notifications (broadcast to active+review clients or one target; suspended excluded; audit-logged). NEW UX: Toast pill + useFlash, Escape-closes-modal, skeleton shimmer loaders, optimistic notification read/unread with unread count + mark-all-read, "See all" links wired on dashboard cards, transaction search inputs, client+admin cycle detail modals, register confirm-password validation. Schema adds: notifications.read, users.email_deposits/email_cycles, support_messages, password_resets. 21 tests passing (5 new), build clean, all flows verified live against the running API (daniel/admin cookies, support POST 201, admin tx feed 10 rows, read-all 200). discovered a NEWER template revision, `rysyl-templates.html` (65KB, Claude-artifact export), alongside the original 27KB file. It supersedes the original — treat BOTH as reference, newer wins on conflicts. Fixed the philosophy word-jam bug ("Mostpeoplechasethenoise"): WordLight now renders spans joined with literal spaces via Fragment (template's `.join(' ')`), verified via DOM (correct text, 32 spans, 14px gaps). Applied the newer template's CSS revisions to index.css: `-webkit-backdrop-filter` prefixes on #sw/.nav.s/.c, `white-space:nowrap` on #sw button, mobile ≤900px now hides `nav a:not(.btn)` (Sign in button stays visible) + tighter `.nav` padding 18px 20px. Audited remaining deltas as NON-deltas: stat count-up (1600ms cubic ease-out, IO threshold .25) matches the template's own JS path exactly (template ships pre-filled '500+' markup but its JS resets to 0 and counts up); template uses literal →/↑/· glyphs, we use &rarr;/&uarr;/&middot; — identical rendering; `.js` progressive-enhancement guards not applicable to a React SPA. Build clean. NOTE: browser preview screenshots failed all session (webview compositor); DOM checks via preview_evaluate used as fallback — user's stale-screenshot report of the word-jam predates the fix, hard-refresh required. Also audited `C:\Projects2\rysyl_v2` (Lovable export: TanStack Start, mock-data-only by mandate, no backend/ledger/auth) — verdict: good feature menu, wrong foundation; see 30 Sep entry for the parity merge.
+- **1 Oct 2026** — GIT INITIALIZED + ROOT COMMIT (repo was never under version control — RECAP's open "git init" item closed): `.gitignore` created (excludes instance/ SQLite DB, *.db, .env*, node_modules, dist, caches — verified no secrets/data staged); root commit `dc0048d` on `main` (55 files, 6,313 insertions — entire build through 30 Sep incl. both docs); remote `origin` → https://github.com/whyyam1/rysyl.git (user-provided repo, confirmed empty). PUSH: first push attempt was denied 403 because the machine's stored GitHub credentials belonged to a different account; the user switched credentials on this machine and the push completed as whyyam1 (`git push -u origin main` from project root). Corrections found during commit prep: `api/requirements.txt` DOES exist (minimal/unpinned — flask, flask-sqlalchemy, flask-cors, pytest; still no gunicorn) and `web/public/favicon.svg` DOES exist (still stock Vite bolt) — LAUNCH_READINESS.md amended accordingly. NOTE: favicon + requirements were missed by earlier globs on absolute-path cwd; trust `ls`/read over glob for existence checks in this workspace.
+- **30 Sep 2026 (7)** — PROCESS PILLS → GLASS CHIPS + LAUNCH READINESS DOC: (1) landing Process 01–04 grid converted to the same frosted-glass chip language as the Philosophy stats row (user: "implement the same here too") — 4 cells now gradient glass fill, hairline border, blur 16px/saturate 1.3, 18px radius, 16px gap, hover lift + blue glow; step numerals (01–04) upgraded to GOLD serif rgba(201,168,106,.85) echoing the sealed-lockup hairline (was muted gray). Verified live in preview. (2) Created [LAUNCH_READINESS.md](./LAUNCH_READINESS.md) — user-requested launch audit ("if we are going to launch this website… what has not been taken care of yet… include databases and hosting, deployment"). Verdict: build-complete for a private pilot; NOT public/real-money ready. P0 blockers: no requirements.txt/WSGI entry (dependency manifest missing entirely), no Alembic migrations (create_all only), no Postgres provisioned (DATABASE_URL supported but unset), no deployment/HTTPS/domain, insecure SECRET_KEY fallback + seeded demo creds, SMTP silently skipped without SMTP_HOST (notify.py). P1: backups, security review (cookie flags/headers/admin 2FA), monitoring, admin support inbox (support_messages are DB-only — no admin UI), Kenya CMA/DPA-2019 legal posture. P2: favicon file missing (index.html references /favicon.svg), CI, a11y, OG tags. Phased 0–3 path to launch (~2–3 weeks infra + legal). Facts verified in code before writing (config.py DATABASE_URL, notify.py skip, seed creds, withdrawal flow, favicon glob).
+- **30 Sep 2026 (6)** — PHILOSOPHY STATS → GLASS CHIPS (user asked for improvement suggestions on the Philosophy section; from the 4-option menu they chose ONLY the glass stats row — light/gold treatment, word-reveal shimmer, editorial lead line explicitly NOT chosen, still available later): `.stats` row converted from bare hairline-topped text to three frosted chips matching the dashboard card language — 165° gradient glass fill, hairline border, blur 16px/saturate 1.3, inset top-light/bottom-dark + deep drop shadow, 18px radius, 16px gap, hover lift −3px with blue glow; each chip leads with a small fading gold tick (`.stat::before`, echoes the sealed-lockup hairline); numerals now white→silver gradient-clip (matches .num treatment) keeping the template's Cormorant count-up; label styling unchanged. Mobile ≤900px: single column, 12px gap, tighter padding. CSS-only — Stat component/observer untouched. Verified in preview: chips render glass/border/tick/gradient numerals. NOTE: webview IntersectionObservers went dormant mid-session (fresh IO on an in-viewport element never fires; 1/12 reveals ignited) — count-up untestable in-preview this round but React logic unchanged; verified fine in user's browser previously. Build clean.
+- **30 Sep 2026 (5)** — FROSTED AUTH (user ref: iOS frosted-glass concept): sign-in/register (and Forgot/Reset, shared `.form`) rebuilt — `.form` is now a relative stage with an overflow-hidden `::before` drifting color field (4 radial blobs: RYSYL blue rgba(47,109,158,.5), champagne gold rgba(201,168,106,.26), deep navy, secondary blue; 26s ease-in-out alternate pan/zoom `@keyframes drift`) so the blur has rich color to frost. `.fbox` floats above it as heavy frosted glass: padding 36px 32px 30px, 22px radius, gradient glass fill, hairline border, inset top-light + bottom-dark edges, deep drop shadow, `blur(26px) saturate(1.4)`. Form fields keep the template underline style inside the card. Verified via DOM: drift animation running, box blur/radius/shadow applied. Build clean.
+- **30 Sep 2026 (4)** — NEW BRAND MARK + hero balance glow (user researched identity options and picked the formal serif treatment — "6 — Sealed lockup: Cormorant Garamond caps with a thin gold hairline framing the whole mark, fading at both ends"): `.logo` rebuilt — Cormorant 500 caps 22px @ .32em tracking (was Inter 15px/.42em), `GROUP` sub-line now Inter 8.5px/.5em in warm stone #8f8d88, and a `::after` gold hairline (linear-gradient transparent→rgba(201,168,106,.85)→transparent + faint gold glow) — corrected after user comparison to the true "sealed lockup": CENTERED stack (text-align:center with tracking-compensating text-indent on both lines) with the hairline at fixed 4.8em (≈ wordmark width) centered under the mark via margin:auto, not full-block-width left-aligned. Presence per surface: landing nav + footer 22px, dashboard sidebars 19px (padding tightened 30→26px), auth aside 27px. Balance card: new `.c.hero` variant — blue-tinted glass gradient (rgba(38,84,128,.5)→rgba(13,26,40,.44)), brighter border rgba(151,190,224,.2), blue-weighted shadow stack, overflow:visible with a `::after` radial aura (rgba(47,109,158,.32), inset −40%) breathing on a 6s opacity/scale loop (`@keyframes brth`) behind the card. Verified live: nav/footer/aside/sidebar/footer marks all serif+hairline at the right sizes; hero card aura animation `brth` running. 21 tests passing, build clean.
+- **30 Sep 2026 (3)** — LUXURY GLASS PASS (user directive: glassmorphism "not good enough… needs to feel luxurious", with two out-of-context references — frosted-glass smart-home dashboard + dark fintech credit dashboard): (1) sidebar dot bullets REMOVED per user — deleted `.side a::before` rule (admin + client); nav labels now clean text, 12px radius. (2) Full glass system: new tokens `--glassbr` rgba(213,217,220,.09) + `--glsd` (top-highlight inset + bottom-inner-dark + large soft drop) + `--glsd2` in `:root`; `.c` cards now 165° gradient fill rgba(50,60,70,.42)→rgba(20,28,36,.36), blur 22px + saturate 1.3, glass border, --glsd, hover lift adds blue glow; `.side` glass gradient + blur 22px + saturate 1.3; `.nav.s` glass blur 20px/saturate 1.4 + hairline border + drop shadow; `.ban` banner glass; `.btn` luminous bevel gradient (inset white top, inner bottom dark, soft light drop); `.sm`/`.srch`/`.b` badges/pills glass-bevel; `.toast`/`#sw` switcher upgrade to glass gradient + border + blur 18px; `#sw button.on` blue gradient pill; modals (Client + Admin OVERLAY/BOX) — overlay blur 10px, box blur 28px/saturate 1.35, gradient fill, 20px radius, deep shadow; hero/process get faint center blue glow layer (radial 46%×34% rgba(47,109,158,.12-.14)); app bg gains bottom-left deep-blue radial; `.form` auth pane faint glow; body noise 0.08→0.045. (3) Admin inline pill-style selects (notifications recipient + new-cycle client + new-return cycle) normalized to template underline style — textarea/select consistency after the earlier fix. Verified live via DOM: dots gone (::before content none), card/sidebar/modal blur+saturate applied, nav.s glass on scroll, switcher/toast glass, hero glow; 21 tests passing, build clean.
+- **30 Sep 2026 (2)** — UI fixes from user screenshots: (1) textareas in client Support + admin Notifications rendered as UA-default gray monospace boxes — `index.css` input rule only covered `input`; added `select,textarea` to the underline-input selector (+ `input:focus,select:focus,textarea:focus`), with `textarea{resize:vertical;min-height:110px}`. Verified via DOM: both textareas now full-width (692px), transparent bg, Inter, white text, var(--line) bottom border. Template-faithful (v2 styles.css already had select+textarea in the selector). (2) USER-APPROVED TEMPLATE DEVIATION: landing Process section restyled from the template's light cream (`#d3d1ce`) section to the dark blue-gradient language of the rest of the landing page — `.light` rules replaced by `.process` (radial-gradients #1d4a75/#0d2238 over var(--bg), mirrored from hero/quit), `.pill` recolored for dark bg (var(--line) borders, hover #eceae6, h3 #eceae6, p var(--sil), numeral var(--mut)); eyebrow inline `#4a545e` dropped in Landing.tsx. `.light`/`.pill` were used nowhere else. Verified live: section gradient + dark-theme colors in DOM, zero `.light` matches. 21 tests passing, build clean.

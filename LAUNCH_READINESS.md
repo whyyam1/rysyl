@@ -1,0 +1,84 @@
+# RYSYL GROUP — Launch Readiness
+
+> **Status as of 30 Sep 2026.** Companion to [RECAP.md](./RECAP.md) (the session-by-session build log — a new `recap.md` would collide with it on Windows, so this doc lives separately and RECAP.md points here).
+>
+> **Verdict up front:** the **product is build-complete for a private pilot** — real auth, real money ledger, 21 passing tests, every flow verified end-to-end in the browser. It is **not ready for public launch or real money** until the Database, Deployment, Email, Security and Legal gaps in §3 are closed. Nothing here is speculative: the product works today on localhost; what's missing is production plumbing and compliance, not features.
+
+---
+
+## 1 · What IS implemented ✅
+
+### Product surface (all verified live in-browser)
+- **Marketing landing** (1:1 template port + user-approved evolutions): parallax "1%" hero, philosophy word-reveal, process steps + stats row as frosted glass chips, long-game line-draw chart, CTA, footer. Full brand system: sealed-lockup logo (Cormorant caps + GROUP + fading gold hairline) across nav/footer/sidebars/auth; luxury glassmorphism pass on every surface (cards, sidebar, nav, badges, buttons, toast, view-switcher, modals); frosted sign-in/register over a drifting color field; glowing hero balance card.
+- **Client area** — Dashboard (balance/invested/returns/portfolio chart/active cycle), Investments (cycle request + guards), Deposits (submit with payer name + payment reference for manual verification), Transactions (search/filter), Notifications (unread counts, read/read-all), Profile, Security (password change + email preferences), Support (messages persisted, never deleted), withdrawal requests (ride the same transaction workflow).
+- **Admin area** — Overview (pending queue, clients, audit feed), Clients (drill-in, status management incl. suspend-never-delete), Deposits (approve/reject with audit), Investments (full cycle state machine: Pending → Approved → Active → Maturing → Matured → Completed, admin-initiated creation), Transactions (platform ledger), Returns (record returns on completed cycles, duplicate-guarded), Reports (CSV exports), Notifications (broadcast or targeted; suspended excluded), Audit logs.
+- **Auth** — sign in / register (confirm-password validation), forgot/reset password (SHA-256-hashed single-use tokens, 30-min expiry, no user enumeration), session cookies, rate-limited login/register.
+
+### Money correctness (the non-negotiables — all enforced)
+- Balances **derived from the ledger only** (`Account.balance()`); never stored, never editable.
+- **Integer minor units** everywhere; no floats.
+- **Suspend, never delete** — clients and rows are immutable history.
+- **Append-only audit log** on every admin action.
+- **Manual deposit verification** — client submits payer name + payment ref; admin matches and approves. No payment rails are integrated (by design for MVP).
+- Returns only on **completed** cycles, duplicate-guarded, recorded as ledger rows; balance re-derives.
+- Seed data matches the template numbers exactly (Daniel = KES 1,284,500).
+
+### Engineering
+- Flask app factory + blueprints (auth/client/admin) + SQLAlchemy models; env-driven config; CORS allow-list; request size cap; auth rate limiting.
+- React + TypeScript + Vite front end; template CSS ported 1:1 into `web/src/index.css`.
+- **21 pytest tests passing** (auth, money invariant, cycle state machine, CSV, v2-parity surfaces); `npm run build` clean.
+- Database-agnostic config: **Postgres ready via `DATABASE_URL`** (SQLite only for dev/tests).
+
+---
+
+## 2 · Environment & commands (as running today)
+- API: `python -m api` on port 5001 (`RYSYL_PORT` env); Web: `cd web && npm run dev -- --port 5183` (Vite, IPv6).
+- Tests: `python -m pytest -q` → 21 passed. Build: `cd web && npm run build`.
+- Demo logins: `admin@rysyl.group / Admin#2026`, `daniel@rysyl.group / Demo#2026`.
+- **Dependencies unpinned, no production entry point** — `api/requirements.txt` exists but is minimal and unpinned (flask, flask-sqlalchemy, flask-cors, pytest — no gunicorn/WSGI server); no `wsgi.py`. First launch-blocker to fix (§3, P0).
+
+---
+
+## 3 · What is NOT taken care of yet ❌
+
+### P0 — hard blockers (cannot launch without these)
+
+| # | Gap | Detail |
+|---|-----|--------|
+| 1 | **Database: no migrations** | Schema is created from models (`db.create_all`-style). No **Alembic** — so no safe, reviewable schema changes in production and no upgrade path for live data. **Do:** stand up Postgres, init Alembic, baseline the current schema, and never rely on create_all again. |
+| 2 | **Database: not provisioned** | Production runs on SQLite-by-default today. **Do:** provision managed Postgres (Neon/Supabase/RDS), set `DATABASE_URL`, run the baseline migration, verify against a staging copy. |
+| 3 | **Deployment: doesn't exist** | No server, no domain wiring, no HTTPS. No pinned dependencies (minimal unpinned `api/requirements.txt` only), no `wsgi.py` entry point, no process manager. **Do:** pin dependencies (pip-compile or `pyproject.toml`), add `wsgi.py` (gunicorn), static-build the web app and serve it (same-origin behind nginx/Cloudflare, or a Vite static host + API subdomain), update `CORS_ORIGINS`, provision TLS. Small single-VPS + Cloudflare is enough for pilot scale; Railway/Fly also fine. |
+| 4 | **Secrets & env** | `SECRET_KEY` falls back to a dev-only insecure key; demo passwords are seeded. **Do:** generate real secrets, move ALL config to environment variables on the host, remove/disable seed credentials, rotate the admin password, decide whether seeded demo clients exist in prod (recommend: empty ledger, admin-only at first). |
+| 5 | **Email: notifications silently skipped** | `notify.py` is best-effort SMTP and **skips silently without `SMTP_HOST`** — in prod, clients would get no deposit/cycle/return emails. **Do:** provision transactional SMTP (e.g. Resend/Postmark/SES), set `SMTP_HOST/PORT/USER/...` + `MAIL_FROM`, verify forgot-password and notification emails actually arrive. |
+
+### P1 — required before *real money* (pilot with real KES)
+
+| # | Gap | Detail |
+|---|-----|--------|
+| 6 | **Backups & recovery** | Ledger + audit are the product. **Do:** automated daily Postgres backups with tested restore; consider point-in-time recovery. |
+| 7 | **Security review** | Server-side validation exists and money rules are enforced server-side, but there has been no formal pass: session cookie flags (`Secure`/`SameSite`/`HttpOnly`) in prod, security headers (CSP, HSTS, X-Frame-Options), dependency audit, penetration check of auth + admin surfaces, **admin 2FA decision** (flagged in RECAP as open). |
+| 8 | **Monitoring & ops** | No error tracking (Sentry), no uptime monitor, no structured logs retention, no health-check exposure for the host (a `/api/health` exists for dev). |
+| 9 | **Support inbox (admin)** | Client support messages persist to `support_messages`, but there is **no admin page to read/reply** — today they're DB-only. Add a minimal admin Support view before users have questions. |
+| 10 | **Legal & compliance (Kenya)** | This is an investment product: **CMA (Capital Markets Authority) / SASRA regulatory posture must be assessed before taking real money** — possibly an exempt/fund-manager arrangement. Also needed: Terms of Service, Privacy Policy (Kenya DPA 2019 — client data, retention), risk disclosures, company registration details, complaint-handling process (ties into #9). |
+
+### P2 — quality & polish (not blockers)
+- **Favicon**: `web/public/favicon.svg` is still the stock Vite bolt on the dark brand background. Design the R monogram from the sealed lockup.
+- **CI**: no GitHub Actions running pytest + `npm run build` on push.
+- **Accessibility pass** (focus states, contrast audit on glass surfaces), **mobile QA on real devices**, Lighthouse pass.
+- **Media/assets**: hero typography is the visual identity — consider OG/social preview tags (`og:image`, description) which are currently absent.
+- Password reset email template + notification email templates (currently plain text).
+- Consider staging environment + deploy preview before prod.
+
+---
+
+## 4 · Suggested path to launch
+
+1. **Phase 0 — Packaging (days):** `requirements.txt` + `wsgi.py`, favicon, CI, Alembic init + baseline.
+2. **Phase 1 — Staging (week):** managed Postgres + Alembic, deploy API + built web to a staging host with HTTPS, real SMTP wired, env secrets set, backups on.
+3. **Phase 2 — Hardening (week):** security pass (cookie flags, headers, 2FA decision, dependency audit), Sentry + uptime monitor, admin support inbox, load test the approve/verify flows.
+4. **Phase 3 — Legal & pilot (parallel):** ToS/Privacy/DPA, CMA posture assessment, risk disclosures. Then **private pilot with real money only after Phase 1–3 are green**: a handful of invited clients, manual verification working as designed (the manual-deposit flow is the control, keep it).
+
+**Bottom line:** ~2–3 focused weeks of infrastructure + legal work separate the current build-complete product from a defensible private-pilot launch. The hardest item is #10 (regulatory posture) — start that conversation earliest.
+
+---
+*RYSYL GROUP · LAUNCH_READINESS v1 · 30 Sep 2026 · update as gaps close.*
