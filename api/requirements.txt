@@ -1,18 +1,18 @@
-# RYSYL API — production dependency manifest.
-# Dev convenience: `pip install -r api/requirements.txt` covers tests too (pytest).
-# Deploy targets: `pip install -r api/requirements.txt deploy`
-# The [deploy] extra is intentionally NOT resolved on Windows dev machines.
+# RYSYL API — dependency manifest.
+# One flat file on purpose: pip does NOT support extras on -r files, so a
+# single install (`pip install -r api/requirements.txt`) works identically
+# in dev, CI and deployment. The server bits below are no-ops on a dev
+# Windows box (gunicorn only *runs* on Unix; psycopg[binary] ships wheels
+# everywhere) — keeping them here means CI tests the exact deploy set.
 
 flask>=3.1,<4
 flask-sqlalchemy>=3.1,<4
 flask-cors>=4.0,<5
 alembic>=1.16,<2
 
-# --- deploy extra: production server + Postgres driver (Unix-only) ---
-[deploy]
+# production server + Postgres driver (used in deployment & CI)
 gunicorn>=23,<27
 psycopg[binary]>=3.2,<4
 
-# --- test extra: CI runs the suite with this ---
-[test]
+# tests
 pytest>=8.2,<9
